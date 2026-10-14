@@ -68,7 +68,7 @@ class Library:
             raise LimitExceededError(f"{member.name} has reached the limit of {Member.MAX_BOOKS}")
         book.is_available = False
         member.borrowed_books.append(book)
-        return f"{member.name} borrowed «{book}"
+        return f"{member.name} borrowed {book}"
 
     def return_book(self, isbn, member_id):
         if member_id not in self.members:
@@ -88,8 +88,7 @@ class Library:
         return f"{member.name} has returned {book}"
 
     def available_books(self):
-        for i in list(self.books.values()):
-            print(i)
+        return list((book for book in self.books.values() if book.is_available == True))
 
     def __str__(self):
         return f'Library "{self.name}": {len(self.books)} books, {len(self.members)} members'
@@ -112,12 +111,12 @@ if __name__ == "__main__":
     try:
         print(lib.lend_book(100, 201))
     except BookNotAvailableError as e:
-        print(e)
+        print(f"Error: {e}")
 
     try:
         print(lib.lend_book(106, 200))
     except BookNotFoundError as e:
-        print(e)
+        print(f"Error: {e}")
 
     print(lib.lend_book(101, 200))
     print(lib.lend_book(102, 200))
@@ -125,11 +124,11 @@ if __name__ == "__main__":
     try:
         print(lib.lend_book(103, 200))
     except LibraryError as e:
-        print(e)
+        print(f"Error: {e}")
 
     print(lib.return_book(100, 200))
 
     try:
         print(lib.lend_book(100, 202))
     except LibraryError as e:
-        print(e)
+        print(f"Error: {e}")
