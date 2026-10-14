@@ -11,12 +11,15 @@ class LimitExceededError(LibraryError):
     pass
 
 class Book:
+    total_created = 0
+
     def __init__(self, isbn, title, author, year, is_available=True):
         self.isbn = isbn
         self.title = title
         self.author = author
         self.year = year
         self.is_available = is_available
+        Book.total_created += 1
 
     def __str__(self):
         return f"{self.title} - {self.author} ({self.year})"
@@ -43,6 +46,7 @@ class Library:
         self.name = name
         self.books = {}
         self.members = {}
+        self.history = []
 
     def add_book(self, book):
         self.books[book.isbn] = book
@@ -68,6 +72,7 @@ class Library:
             raise LimitExceededError(f"{member.name} has reached the limit of {Member.MAX_BOOKS}")
         book.is_available = False
         member.borrowed_books.append(book)
+        self.history.append(f"{member.name} has borrowed {book}")
         return f"{member.name} borrowed {book}"
 
     def return_book(self, isbn, member_id):
@@ -85,10 +90,18 @@ class Library:
 
         book.is_available = True
         member.borrowed_books.remove(book)
+        self.history.append(f"{member.name} has returned {book}")
         return f"{member.name} has returned {book}"
 
     def available_books(self):
-        return list((book for book in self.books.values() if book.is_available == True))
+        return list((book for book in self.books.values() if book.is_available))
+
+    def find_by_author(self, author):
+        query = author.strip().lower()
+        return [book for book in self.books.values() if book.author.lower() == query]
+
+    def print_history(self):
+        return  "History:\n" + "\n".join(self.history)
 
     def __str__(self):
         return f'Library "{self.name}": {len(self.books)} books, {len(self.members)} members'
@@ -132,3 +145,17 @@ if __name__ == "__main__":
         print(lib.lend_book(100, 202))
     except LibraryError as e:
         print(f"Error: {e}")
+
+    books = lib.find_by_author("taras shevchenko")
+    print(f"Books by Taras Shevchenko: {len(books)}")
+    for book in books:
+        print(book)
+
+    books1 = lib.find_by_author("Ihor Kaptol")
+    print(f"Books by Ihor Kaptol: {len(books1)}")
+    for book in books1:
+        print(book)
+
+    print(lib.print_history())
+
+    print(f"Total number of created books = {Book.total_created}")
