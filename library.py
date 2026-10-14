@@ -87,3 +87,49 @@ class Library:
         member.borrowed_books.remove(book)
         return f"{member.name} has returned {book}"
 
+    def available_books(self):
+        for i in list(self.books.values()):
+            print(i)
+
+    def __str__(self):
+        return f'Library "{self.name}": {len(self.books)} books, {len(self.members)} members'
+
+if __name__ == "__main__":
+    lib = Library("Central Library")
+    lib.add_book(Book(100, "Kobzar", "Taras Shevchenko", 1840))
+    lib.add_book(Book(101, "Zakhar Berkut", "Ivan Franko", 1883))
+    lib.add_book(Book(102, "Lisova pisnia", "Lesya Ukrainka", 1911))
+    lib.add_book(Book(103, "Tyhrolovy", "Ivan Franco", 1944))
+    lib.add_book(Book(105, "Eneida", "Ivan Kotliarevsky", 1798))
+
+    lib.add_member(Member(200, "Ihor"))
+    lib.add_member(Member(201, "Arthur"))
+
+    print(lib)
+
+    print(lib.lend_book(100, 200))
+
+    try:
+        print(lib.lend_book(100, 201))
+    except BookNotAvailableError as e:
+        print(e)
+
+    try:
+        print(lib.lend_book(106, 200))
+    except BookNotFoundError as e:
+        print(e)
+
+    print(lib.lend_book(101, 200))
+    print(lib.lend_book(102, 200))
+
+    try:
+        print(lib.lend_book(103, 200))
+    except LibraryError as e:
+        print(e)
+
+    print(lib.return_book(100, 200))
+
+    try:
+        print(lib.lend_book(100, 202))
+    except LibraryError as e:
+        print(e)
