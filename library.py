@@ -10,6 +10,9 @@ class BookNotAvailableError(LibraryError):
 class LimitExceededError(LibraryError):
     pass
 
+class MemberNotFoundError(LibraryError):
+    pass
+
 class Book:
     total_created = 0
 
@@ -56,7 +59,7 @@ class Library:
 
     def lend_book(self, isbn, member_id):
         if member_id not in self.members:
-            raise LibraryError(f"Member {member_id} not available")
+            raise MemberNotFoundError(f"Member {member_id} not found")
 
         if isbn not in self.books:
             raise BookNotFoundError(f"Book {isbn} not found")
