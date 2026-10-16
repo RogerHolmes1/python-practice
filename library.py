@@ -112,15 +112,15 @@ class Library:
 
     def lend_item(self, item_id, member_id):
         if member_id not in self.members:
-            raise MemberNotFoundError(f"Member {member_id} not found")
+            raise MemberNotFoundError(f"Member '{member_id}' not found")
 
         if item_id not in self.items:
-            raise ItemNotFoundError(f"Item {item_id} not found")
+            raise ItemNotFoundError(f"Item '{item_id}' not found")
 
         item = self.items[item_id]
 
         if  not item.is_available:
-            raise ItemNotAvailableError(f"Item {item_id} not available")
+            raise ItemNotAvailableError(f"Item '{item_id}' is not available")
 
         member = self.members[member_id]
 
@@ -133,10 +133,10 @@ class Library:
 
     def return_item(self, item_id, member_id):
         if member_id not in self.members:
-            raise MemberNotFoundError(f"Member {member_id} not available")
+            raise MemberNotFoundError(f"Member '{member_id}' not found")
 
         if item_id not in self.items:
-            raise ItemNotFoundError(f"Book {item_id} not found")
+            raise ItemNotFoundError(f"Item '{item_id}' not found")
 
         item = self.items[item_id]
         member = self.members[member_id]
