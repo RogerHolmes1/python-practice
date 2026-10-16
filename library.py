@@ -69,6 +69,18 @@ class Magazine(LibraryItem):
     def __str__(self):
         return f"{self.title} #{self.issue} ({self.year})"
 
+class DVD(LibraryItem):
+
+    def __init__(self, item_id, title, year, duration_min, is_available=True):
+        super().__init__(item_id, title, year, is_available)
+        self.duration_min = duration_min
+
+    def loan_days(self):
+        return 3
+
+    def __str__(self):
+        return f"{self.title} [DVD, {self.duration_min} min] ({self.year})"
+
 class Member:
     MAX_ITEMS = 3
 
