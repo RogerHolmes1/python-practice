@@ -3,10 +3,10 @@ from abc import ABC, abstractmethod
 class LibraryError(Exception):
     pass
 
-class BookNotFoundError(LibraryError):
+class ItemNotFoundError(LibraryError):
     pass
 
-class BookNotAvailableError(LibraryError):
+class ItemNotAvailableError(LibraryError):
     pass
 
 class LimitExceededError(LibraryError):
@@ -58,123 +58,123 @@ class Book(LibraryItem):
         return f"{self.title} - {self.author} ({self.year})"
 
 class Member:
-    MAX_BOOKS = 3
+    MAX_ITEMS = 3
 
     def __init__(self, member_id, name):
         self.member_id = member_id
         self.name = name
-        self.borrowed_books = []
+        self.borrowed_items = []
 
     def can_borrow(self):
-        return len(self.borrowed_books) < self.MAX_BOOKS
+        return len(self.borrowed_items) < self.MAX_ITEMS
 
     def __str__(self):
-        return f"{self.name} (books: {len(self.borrowed_books)}/{self.MAX_BOOKS})"
+        return f"{self.name} (items: {len(self.borrowed_items)}/{self.MAX_ITEMS})"
 
 class Library:
     def __init__(self, name):
         self.name = name
-        self.books = {}
+        self.items = {}
         self.members = {}
         self.history = []
 
-    def add_book(self, book):
-        if book.isbn in self.books:
-            raise LibraryError(f"Book '{book.isbn}' already exists")
-        self.books[book.isbn] = book
+    def add_item(self, item):
+        if item.item_id in self.items:
+            raise LibraryError(f"Item '{item.item_id}' already exists")
+        self.items[item.item_id] = item
 
     def add_member(self, member):
         self.members[member.member_id] = member
 
-    def lend_book(self, isbn, member_id):
+    def lend_item(self, item_id, member_id):
         if member_id not in self.members:
             raise MemberNotFoundError(f"Member {member_id} not found")
 
-        if isbn not in self.books:
-            raise BookNotFoundError(f"Book {isbn} not found")
+        if item_id not in self.items:
+            raise ItemNotFoundError(f"Item {item_id} not found")
 
-        book = self.books[isbn]
+        item = self.items[item_id]
 
-        if  not book.is_available:
-            raise BookNotAvailableError(f"Book {isbn} not available")
+        if  not item.is_available:
+            raise ItemNotAvailableError(f"Item {item_id} not available")
 
         member = self.members[member_id]
 
         if  not member.can_borrow():
-            raise LimitExceededError(f"{member.name} has reached the limit of {Member.MAX_BOOKS}")
-        book.is_available = False
-        member.borrowed_books.append(book)
-        self.history.append(f"{member.name} has borrowed {book}")
-        return f"{member.name} borrowed {book}"
+            raise LimitExceededError(f"{member.name} has reached the limit of {Member.MAX_ITEMS}")
+        item.is_available = False
+        member.borrowed_items.append(item)
+        self.history.append(f"{member.name} has borrowed {item}")
+        return f"{member.name} borrowed {item}"
 
-    def return_book(self, isbn, member_id):
+    def return_item(self, item_id, member_id):
         if member_id not in self.members:
-            raise LibraryError(f"Member {member_id} not available")
+            raise MemberNotFoundError(f"Member {member_id} not available")
 
-        if isbn not in self.books:
-            raise BookNotFoundError(f"Book {isbn} not found")
+        if item_id not in self.items:
+            raise ItemNotFoundError(f"Book {item_id} not found")
 
-        book = self.books[isbn]
+        item = self.items[item_id]
         member = self.members[member_id]
 
-        if book not in member.borrowed_books:
-            raise LibraryError(f"Member {member.name} hasn't borrowed {book}")
+        if item not in member.borrowed_items:
+            raise LibraryError(f"Member {member.name} hasn't borrowed {item}")
 
-        book.is_available = True
-        member.borrowed_books.remove(book)
-        self.history.append(f"{member.name} has returned {book}")
-        return f"{member.name} has returned {book}"
+        item.is_available = True
+        member.borrowed_items.remove(item)
+        self.history.append(f"{member.name} has returned {item}")
+        return f"{member.name} has returned {item}"
 
-    def available_books(self):
-        return list((book for book in self.books.values() if book.is_available))
+    def available_items(self):
+        return [item for item in self.items.values() if item.is_available]
 
     def find_by_author(self, author):
         query = author.strip().lower()
-        return [book for book in self.books.values() if book.author.lower().strip() == query]
+        return [item for item in self.items.values() if item.author.lower().strip() == query]
 
     def get_history(self):
         return  "History:\n" + "\n".join(self.history)
 
     def __str__(self):
-        return f'Library "{self.name}": {len(self.books)} books, {len(self.members)} members'
+        return f'Library "{self.name}": {len(self.items)} items, {len(self.members)} members'
 
 if __name__ == "__main__":
     lib = Library("Central Library")
-    lib.add_book(Book(100, "Kobzar", "Taras Shevchenko", 1840))
-    lib.add_book(Book(101, "Zakhar Berkut", "Ivan Franko", 1883))
-    lib.add_book(Book(102, "Lisova pisnia", "Lesya Ukrainka", 1911))
-    lib.add_book(Book(103, "Tyhrolovy", "Ivan Bahrianyi", 1944))
-    lib.add_book(Book(105, "Eneida", "Ivan Kotliarevsky", 1798))
+    lib.add_item(Book(100, "Kobzar", "Taras Shevchenko", 1840))
+    lib.add_item(Book(101, "Zakhar Berkut", "Ivan Franko", 1883))
+    lib.add_item(Book(102, "Lisova pisnia", "Lesya Ukrainka", 1911))
+    lib.add_item(Book(103, "Tyhrolovy", "Ivan Bahrianyi", 1944))
+    lib.add_item(Book(105, "Eneida", "Ivan Kotliarevsky", 1798))
 
     lib.add_member(Member(200, "Ihor"))
     lib.add_member(Member(201, "Arthur"))
 
     print(lib)
 
-    print(lib.lend_book(100, 200))
+    print(lib.lend_item(100, 200))
 
     try:
-        print(lib.lend_book(100, 201))
-    except BookNotAvailableError as e:
+        print(lib.lend_item(100, 201))
+    except ItemNotAvailableError as e:
         print(f"Error: {e}")
 
     try:
-        print(lib.lend_book(106, 200))
-    except BookNotFoundError as e:
+        print(lib.lend_item(106, 200))
+    except ItemNotFoundError as e:
         print(f"Error: {e}")
 
-    print(lib.lend_book(101, 200))
-    print(lib.lend_book(102, 200))
+    print(lib.lend_item(101, 200))
+    print(lib.lend_item(102, 200))
 
     try:
-        print(lib.lend_book(103, 200))
+        print(lib.lend_item(103, 200))
     except LibraryError as e:
         print(f"Error: {e}")
 
-    print(lib.return_book(100, 200))
+    print(lib.return_item(100, 200))
 
     try:
-        print(lib.lend_book(100, 202))
+        print(lib.lend_item(100, 202))
     except LibraryError as e:
         print(f"Error: {e}")
 
@@ -189,10 +189,10 @@ if __name__ == "__main__":
         print(book)
 
     print(lib.get_history())
-    
+
     print(sorted([Book(102, "Lisova pisnia", "Lesya Ukrainka", 1911),
                   Book(100, "Kobzar", "Taras Shevchenko", 1840)]))
     try:
-        lib.add_book(Book(100, "test", "test1", 1999))
+        lib.add_item(Book(100, "test", "test1", 1999))
     except LibraryError as e:
         print(f"Error: {e}")
