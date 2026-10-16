@@ -44,20 +44,18 @@ class LibraryItem(ABC):
         return (self.year, self.title) < (other.year, other.title)
 
 
-class Book():
+class Book(LibraryItem):
 
     def __init__(self, isbn, title, author, year, is_available=True):
+        super().__init__(isbn, title, year, is_available)
         self.isbn = isbn
-        self.title = title
         self.author = author
-        self.year = year
-        self.is_available = is_available
+
+    def loan_days(self):
+        return 14
 
     def __str__(self):
         return f"{self.title} - {self.author} ({self.year})"
-
-    def __repr__(self):
-        return f"Book(isbn={self.isbn!r}, title={self.title!r})"
 
 class Member:
     MAX_BOOKS = 3
@@ -191,7 +189,9 @@ if __name__ == "__main__":
         print(book)
 
     print(lib.get_history())
-
+    
+    print(sorted([Book(102, "Lisova pisnia", "Lesya Ukrainka", 1911),
+                  Book(100, "Kobzar", "Taras Shevchenko", 1840)]))
     try:
         lib.add_book(Book(100, "test", "test1", 1999))
     except LibraryError as e:
