@@ -39,7 +39,7 @@ class Member:
         self.borrowed_books = []
 
     def can_borrow(self):
-        return True if len(self.borrowed_books) < self.MAX_BOOKS else False
+        return len(self.borrowed_books) < self.MAX_BOOKS
 
     def __str__(self):
         return f"{self.name} (books: {len(self.borrowed_books)}/{self.MAX_BOOKS})"
@@ -103,9 +103,9 @@ class Library:
 
     def find_by_author(self, author):
         query = author.strip().lower()
-        return [book for book in self.books.values() if book.author.lower() == query]
+        return [book for book in self.books.values() if book.author.lower().strip() == query]
 
-    def print_history(self):
+    def get_history(self):
         return  "History:\n" + "\n".join(self.history)
 
     def __str__(self):
@@ -116,7 +116,7 @@ if __name__ == "__main__":
     lib.add_book(Book(100, "Kobzar", "Taras Shevchenko", 1840))
     lib.add_book(Book(101, "Zakhar Berkut", "Ivan Franko", 1883))
     lib.add_book(Book(102, "Lisova pisnia", "Lesya Ukrainka", 1911))
-    lib.add_book(Book(103, "Tyhrolovy", "Ivan Franco", 1944))
+    lib.add_book(Book(103, "Tyhrolovy", "Ivan Bahrianyi", 1944))
     lib.add_book(Book(105, "Eneida", "Ivan Kotliarevsky", 1798))
 
     lib.add_member(Member(200, "Ihor"))
@@ -161,7 +161,7 @@ if __name__ == "__main__":
     for book in books1:
         print(book)
 
-    print(lib.print_history())
+    print(lib.get_history())
 
     print(f"Total number of created books = {Book.total_created}")
 
