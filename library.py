@@ -52,6 +52,8 @@ class Library:
         self.history = []
 
     def add_book(self, book):
+        if book.isbn in self.books:
+            raise LibraryError(f"Book '{book.isbn}' already exists")
         self.books[book.isbn] = book
 
     def add_member(self, member):
@@ -162,3 +164,8 @@ if __name__ == "__main__":
     print(lib.print_history())
 
     print(f"Total number of created books = {Book.total_created}")
+
+    try:
+        lib.add_book(Book(100, "test", "test1", 1999))
+    except LibraryError as e:
+        print(f"Error: {e}")
