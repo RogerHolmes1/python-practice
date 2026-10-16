@@ -57,6 +57,18 @@ class Book(LibraryItem):
     def __str__(self):
         return f"{self.title} - {self.author} ({self.year})"
 
+class Magazine(LibraryItem):
+
+    def __init__(self, item_id, title, year, issue, is_available=True):
+        super().__init__(item_id, title, year, is_available)
+        self.issue = issue
+
+    def loan_days(self):
+        return 7
+
+    def __str__(self):
+        return f"{self.title} #{self.issue} ({self.year})"
+
 class Member:
     MAX_ITEMS = 3
 
@@ -126,11 +138,11 @@ class Library:
         return f"{member.name} has returned {item}"
 
     def available_items(self):
-        return [item for item in self.items.values() if item.is_available]
+        return sorted([item for item in self.items.values() if item.is_available])
 
     def find_by_author(self, author):
         query = author.strip().lower()
-        return [item for item in self.items.values() if item.author.lower().strip() == query]
+        return [item for item in self.items.values() if isinstance(item, Book) and item.author.lower().strip() == query]
 
     def get_history(self):
         return  "History:\n" + "\n".join(self.history)
@@ -196,3 +208,7 @@ if __name__ == "__main__":
         lib.add_item(Book(100, "test", "test1", 1999))
     except LibraryError as e:
         print(f"Error: {e}")
+
+    lib.add_item(Magazine("M1", "Ukrainskyi Tyzhden", 2024, 42))
+    print("Available:")
+    print("\n".join(str(item) for item in lib.available_items()))
