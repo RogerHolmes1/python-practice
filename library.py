@@ -128,8 +128,8 @@ class Library:
             raise LimitExceededError(f"{member.name} has reached the limit of {Member.MAX_ITEMS}")
         item.is_available = False
         member.borrowed_items.append(item)
-        self.history.append(f"{member.name} has borrowed {item}")
-        return f"{member.name} borrowed {item}"
+        self.history.append(f"{member.name} has borrowed {item} for {item.loan_days()} days")
+        return f"{member.name} borrowed {item} for {item.loan_days()} days"
 
     def return_item(self, item_id, member_id):
         if member_id not in self.members:
@@ -224,3 +224,7 @@ if __name__ == "__main__":
     lib.add_item(Magazine("M1", "Ukrainskyi Tyzhden", 2024, 42))
     print("Available:")
     print("\n".join(str(item) for item in lib.available_items()))
+
+    lib.add_item(DVD("D1", "Tini zabutykh predkiv", 1965, 97))
+    print(lib.lend_item("M1", 201))
+    print(lib.lend_item("D1", 201))
