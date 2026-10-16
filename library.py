@@ -1,3 +1,5 @@
+from abc import ABC, abstractmethod
+
 class LibraryError(Exception):
     pass
 
@@ -13,8 +15,36 @@ class LimitExceededError(LibraryError):
 class MemberNotFoundError(LibraryError):
     pass
 
-class Book:
+class LibraryItem(ABC):
     total_created = 0
+
+    def __init__(self, item_id, title, year, is_available=True):
+        self.item_id = item_id
+        self.title = title
+        self.year = year
+        self.is_available = is_available
+        LibraryItem.total_created += 1
+
+    @abstractmethod
+    def loan_days(self):
+        pass
+
+    def __repr__(self):
+        return f"{type(self).__name__}(item_id={self.item_id!r}, title={self.title!r})"
+
+    def __eq__(self, other):
+        if not isinstance(other, LibraryItem):
+            return NotImplemented
+        return self.item_id == other.item_id
+
+    def __hash__(self):
+        return hash(self.item_id)
+
+    def __lt__(self, other):
+        return (self.year, self.title) < (other.year, other.title)
+
+
+class Book():
 
     def __init__(self, isbn, title, author, year, is_available=True):
         self.isbn = isbn
@@ -22,7 +52,6 @@ class Book:
         self.author = author
         self.year = year
         self.is_available = is_available
-        Book.total_created += 1
 
     def __str__(self):
         return f"{self.title} - {self.author} ({self.year})"
@@ -162,8 +191,6 @@ if __name__ == "__main__":
         print(book)
 
     print(lib.get_history())
-
-    print(f"Total number of created books = {Book.total_created}")
 
     try:
         lib.add_book(Book(100, "test", "test1", 1999))
