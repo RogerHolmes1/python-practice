@@ -103,6 +103,8 @@ class Library:
         self.history = []
 
     def add_item(self, item):
+        if not isinstance(item, LibraryItem):
+            raise TypeError(f"Expected LibraryItem, got {type(item).__name__}")
         if item.item_id in self.items:
             raise LibraryError(f"Item '{item.item_id}' already exists")
         self.items[item.item_id] = item
@@ -162,69 +164,98 @@ class Library:
     def __str__(self):
         return f'Library "{self.name}": {len(self.items)} items, {len(self.members)} members'
 
+    def __len__(self):
+        return len(self.items)
+
+    def __contains__(self, item_id):
+        return item_id in self.items
+
+def section(title):
+    print(f"\n=== {title} ===")
+
+
 if __name__ == "__main__":
+    section("Setup")
     lib = Library("Central Library")
     lib.add_item(Book(100, "Kobzar", "Taras Shevchenko", 1840))
     lib.add_item(Book(101, "Zakhar Berkut", "Ivan Franko", 1883))
     lib.add_item(Book(102, "Lisova pisnia", "Lesya Ukrainka", 1911))
     lib.add_item(Book(103, "Tyhrolovy", "Ivan Bahrianyi", 1944))
     lib.add_item(Book(105, "Eneida", "Ivan Kotliarevsky", 1798))
+    lib.add_item(Magazine("M1", "Ukrainskyi Tyzhden", 2024, 42))
+    lib.add_item(DVD("D1", "Tini zabutykh predkiv", 1965, 97))
 
     lib.add_member(Member(200, "Ihor"))
     lib.add_member(Member(201, "Arthur"))
 
     print(lib)
+    print(f"len: {len(lib)} | 100 in library: {100 in lib} | 999 in library: {999 in lib}")
+    print(f"Total items created: {LibraryItem.total_created}")
 
+    section("Lending (polymorphism: loan_days)")
     print(lib.lend_item(100, 200))
+    print(lib.lend_item("M1", 200))
+    print(lib.lend_item("D1", 201))
 
+    section("Errors")
     try:
-        print(lib.lend_item(100, 201))
+        lib.lend_item("D1", 200)
     except ItemNotAvailableError as e:
         print(f"Error: {e}")
 
     try:
-        print(lib.lend_item(106, 200))
+        lib.lend_item(106, 200)
     except ItemNotFoundError as e:
         print(f"Error: {e}")
 
+    try:
+        lib.lend_item(101, 999)
+    except MemberNotFoundError as e:
+        print(f"Error: {e}")
+
     print(lib.lend_item(101, 200))
-    print(lib.lend_item(102, 200))
+    try:
+        lib.lend_item(102, 200)
+    except LimitExceededError as e:
+        print(f"Error: {e}")
 
     try:
-        print(lib.lend_item(103, 200))
+        lib.return_item(105, 201)
     except LibraryError as e:
         print(f"Error: {e}")
 
+    try:
+        lib.add_item(Book(100, "Kobzar", "Taras Shevchenko", 1840))
+    except LibraryError as e:
+        print(f"Error: {e}")
+
+    try:
+        lib.add_item("Kobzar")
+    except TypeError as e:
+        print(f"TypeError: {e}")
+
+    section("Returning")
     print(lib.return_item(100, 200))
 
-    try:
-        print(lib.lend_item(100, 202))
-    except LibraryError as e:
-        print(f"Error: {e}")
+    section("Members")
+    for member in lib.members.values():
+        print(member)
 
-    books = lib.find_by_author("taras shevchenko")
-    print(f"Books by Taras Shevchenko: {len(books)}")
-    for book in books:
-        print(book)
-
-    books1 = lib.find_by_author("Ihor Kaptol")
-    print(f"Books by Ihor Kaptol: {len(books1)}")
-    for book in books1:
-        print(book)
-
-    print(lib.get_history())
-
-    print(sorted([Book(102, "Lisova pisnia", "Lesya Ukrainka", 1911),
-                  Book(100, "Kobzar", "Taras Shevchenko", 1840)]))
-    try:
-        lib.add_item(Book(100, "test", "test1", 1999))
-    except LibraryError as e:
-        print(f"Error: {e}")
-
-    lib.add_item(Magazine("M1", "Ukrainskyi Tyzhden", 2024, 42))
-    print("Available:")
+    section("Available (sorted by year, then title)")
     print("\n".join(str(item) for item in lib.available_items()))
 
-    lib.add_item(DVD("D1", "Tini zabutykh predkiv", 1965, 97))
-    print(lib.lend_item("M1", 201))
-    print(lib.lend_item("D1", 201))
+    section("Search by author")
+    books = lib.find_by_author(" ivan franko ")
+    print(f"Books by Ivan Franko: {len(books)}")
+    for book in books:
+        print(book)
+    print(f"Books by Ihor Kaptol: {len(lib.find_by_author('Ihor Kaptol'))}")
+
+    section("Magic methods")
+    copy = Book(100, "Kobzar (copy)", "Taras Shevchenko", 1840)
+    print("Same item:", copy == lib.items[100])
+    print("In a set:", len({copy, lib.items[100]}))
+    print(repr(lib.items["M1"]))
+
+    section("History")
+    print(lib.get_history())
